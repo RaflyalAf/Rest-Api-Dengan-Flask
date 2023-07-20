@@ -24,7 +24,7 @@ class ModelDatabase(db.Model):
     umur = db.Column(db.Integer)
     alamat = db.olumn(db.TEXT)
 
-    def seve (self):
+    def save (self):
         try:
             db.session.add(self)
             db.session.commit()
@@ -60,13 +60,24 @@ class ContohReource(Resource):
         dataAlamat = request.form["alamat"]
 
         model = ModelDatabase(nama=dataNama, umur=dataUmur, alamat=dataAlamat)
-        model.seve()
+        model.save()
 
         response = {"msg" : "Data berhasil di masukan",
                     "code" : 200
         
         }
         return response, 200 
+    
+    def deleted(self):
+        query = ModelDatabase.query.all()
+        for data in query:
+            db.session.delete(data)
+            db.session.commit()
+        response = {
+            "msg" : "Semua data berhasil di hapus",
+            "code" : 200
+        }
+        return response, 200
     
 class Naruto(Resource):
     def put(self, id):
@@ -78,6 +89,7 @@ class Naruto(Resource):
         query.nama = editNama
         query.umur = editUmur
         query.alamat = editAlamat
+        db.session.commit()
 
         response = {
             "msg" : "edit data berhasil",
@@ -96,8 +108,8 @@ class Naruto(Resource):
         }
         return response
 
-api.add_resource(ContohReource, "/api", methods=["GET", "POST"])
-api.add_resource(Naruto, "/api/<id>", methods=["PUT"])
+api.add_resource(ContohReource, "/api", methods=["GET", "POST", "DELETE"])
+api.add_resource(Naruto, "/api/<id>", methods=["PUT", "DELETE"])
 
 
 if __name__ == "__main__":
